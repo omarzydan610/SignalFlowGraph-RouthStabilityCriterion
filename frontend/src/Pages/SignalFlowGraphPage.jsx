@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IoArrowBack } from "react-icons/io5";
 import { Stage, Layer } from "react-konva";
+import Header from "../components/Header";
 import NodeInput from "../components/SignalFolwGraphComponents/NodeInput";
-import NodeList from "../components/SignalFolwGraphComponents/NodeList";
 import Node from "../components/SignalFolwGraphComponents/Node";
+import ClearStageButton from "../components/SignalFolwGraphComponents/ClearStageButton";
+import NodesListWindow from "../components/SignalFolwGraphComponents/NodesListWindow";
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
@@ -12,10 +13,7 @@ function SignalFlowGraphPage() {
   const [nodes, setNodes] = useState([]);
 
   const handleAddNode = () => {
-    if (
-      nodeName.trim() === "" ||
-      nodes.some((node) => node.name === nodeName)
-    ) {
+    if (isNodeNameInvalid(nodeName, nodes)) {
       alert("Node name must be unique and not empty");
       return;
     }
@@ -29,10 +27,18 @@ function SignalFlowGraphPage() {
     setNodes(positionNodes(newNodes));
   };
 
+  const handleClearStage = () => {
+    setNodes([]);
+  };
+
+  const isNodeNameInvalid = (name, nodes) => {
+    return name.trim() === "" || nodes.some((node) => node.name === name);
+  };
+
   const positionNodes = (nodes) => {
     const stageWidth = 800;
-    const stageHeight = 400;
-    const radius = Math.min(stageWidth, stageHeight) / 3;
+    const stageHeight = 500;
+    const radius = Math.min(stageWidth, stageHeight) / 2.5;
     const centerX = stageWidth / 2;
     const centerY = stageHeight / 2;
 
@@ -60,44 +66,35 @@ function SignalFlowGraphPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-950 via-blue-700 to-blue-400">
-      <div className="w-full bg-white/10 backdrop-blur-sm shadow-lg relative h-16">
-        <button
-          onClick={() => navigate("/")}
-          className="absolute left-4 top-1/2 -translate-y-1/2 p-2 
-          text-white bg-blue-400 rounded-full text-xl
-          transition-all duration-300 hover:bg-blue-500 
-          hover:shadow-blue-400/50 hover:scale-105 
-          active:scale-95"
-        >
-          <IoArrowBack />
-        </button>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-100 text-transparent bg-clip-text pt-3 text-center">
-          Signal Flow Graph
-        </h1>
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-950 via-blue-700 to-blue-400 flex">
+      <div className="flex-1">
+        <Header navigate={navigate} label={"Signal Flow Graph"} />
+        <div className="p-4">
+          <NodeInput
+            nodeName={nodeName}
+            setNodeName={setNodeName}
+            handleAddNode={handleAddNode}
+          />
+          <ClearStageButton handleClearStage={handleClearStage} />
+        </div>
+        <div className="flex justify-center items-center mt-4">
+          <Stage
+            className="mb-4 rounded-lg"
+            width={800}
+            height={500}
+            style={{ backgroundColor: "white", borderRadius: "15px" }}
+          >
+            <Layer>
+              {nodes.map((node, index) => (
+                <Node key={index} node={node} />
+              ))}
+            </Layer>
+          </Stage>
+        </div>
       </div>
-      <div className="p-4">
-        <NodeInput
-          nodeName={nodeName}
-          setNodeName={setNodeName}
-          handleAddNode={handleAddNode}
-        />
-        <NodeList nodes={nodes} handleRemoveNode={handleRemoveNode} />
-      </div>
-      <div className="flex justify-center items-center mt-4">
-        <Stage
-          className="mb-4 rounded-lg"
-          width={800}
-          height={400}
-          style={{ backgroundColor: "white", borderRadius: "15px" }}
-        >
-          <Layer>
-            {nodes.map((node, index) => (
-              <Node key={index} node={node} />
-            ))}
-          </Layer>
-        </Stage>
-      </div>
+      {nodes.length > 0 && (
+        <NodesListWindow nodes={nodes} handleRemoveNode={handleRemoveNode} />
+      )}
     </div>
   );
 }
