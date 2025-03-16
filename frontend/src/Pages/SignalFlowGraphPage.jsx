@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
-import { Stage, Layer, Circle, Text } from "react-konva";
+import { Stage, Layer } from "react-konva";
+import NodeInput from "../components/SignalFolwGraphComponents/NodeInput";
+import NodeList from "../components/SignalFolwGraphComponents/NodeList";
+import Node from "../components/SignalFolwGraphComponents/Node";
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
@@ -16,10 +19,7 @@ function SignalFlowGraphPage() {
       alert("Node name must be unique and not empty");
       return;
     }
-    const newNodes = [
-      ...nodes,
-      { name: nodeName, color: getRandomColor() },
-    ];
+    const newNodes = [...nodes, { name: nodeName, color: getRandomColor() }];
     setNodes(positionNodes(newNodes));
     setNodeName("");
   };
@@ -51,8 +51,8 @@ function SignalFlowGraphPage() {
   };
 
   const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
+    const letters = "0123456789ABCDEF";
+    let color = "#";
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
@@ -77,38 +77,12 @@ function SignalFlowGraphPage() {
         </h1>
       </div>
       <div className="p-4">
-        <input
-          type="text"
-          value={nodeName}
-          onChange={(e) => setNodeName(e.target.value)}
-          placeholder="Enter node name"
-          className="p-2 border border-gray-300 rounded-md"
+        <NodeInput
+          nodeName={nodeName}
+          setNodeName={setNodeName}
+          handleAddNode={handleAddNode}
         />
-        <button
-          onClick={handleAddNode}
-          className="ml-2 p-2 bg-blue-400 text-white rounded-md transition-all duration-300 hover:bg-blue-500"
-        >
-          Add Node
-        </button>
-        <div className="mt-4">
-          <h2 className="text-xl font-bold text-white">Nodes List</h2>
-          {nodes.map((node, index) => (
-            <div key={index} className="mt-2 flex items-center">
-              <input
-                type="text"
-                value={node.name}
-                readOnly
-                className="p-2 border border-gray-300 rounded-md"
-              />
-              <button
-                onClick={() => handleRemoveNode(index)}
-                className="ml-2 p-2 bg-red-400 text-white rounded-md transition-all duration-300 hover:bg-red-500"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
+        <NodeList nodes={nodes} handleRemoveNode={handleRemoveNode} />
       </div>
       <div className="flex justify-center items-center mt-4">
         <Stage
@@ -119,17 +93,7 @@ function SignalFlowGraphPage() {
         >
           <Layer>
             {nodes.map((node, index) => (
-              <React.Fragment key={index}>
-                <Circle x={node.x} y={node.y} radius={10} fill={node.color} />
-                <Text
-                  x={node.x + 15}
-                  y={node.y - 5}
-                  text={node.name}
-                  fill={node.color}
-                  fontSize={16}
-                  fontStyle="bold"
-                />
-              </React.Fragment>
+              <Node key={index} node={node} />
             ))}
           </Layer>
         </Stage>
