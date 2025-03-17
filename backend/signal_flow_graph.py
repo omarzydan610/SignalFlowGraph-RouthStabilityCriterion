@@ -4,78 +4,112 @@ from collections import defaultdict
 class SignalFlowGraph:
     def __init__(self, graph):
         self.graph = graph
-        self.number_of_nodes = len(graph)
+        self.node_count = len(graph)
+        self.paths = None
+        self.cycles = None
+        self.cycle_gains = None
+        self.path_gains = None
+        self.path_deltas = None
+        self.non_touching_cycles = None
         self.visited = {node: False for node in self.graph}
-        self.initialize()
+        self.start_node = None
+        self.end_node = None
+        self.total_delta = None
+        self.transfer_func = None
+        self.optimize_graph() # first step
 
-    def initialize(self):
-        # Initialize variables
-        pass
+    def optimize_graph(self):
+    # This function is used to optimize the graph by removing self loops and parallel edges
+        return
 
-    def simplify_graph(self):
-        # Simplify the graph by merging multiple edges
-        pass
+    def detect_cycles(self):
 
-    def find_loops(self):
-        # Find all loops in the graph
-        pass
+        return 
 
-    def dfs_for_loops(self, node, start, path):
-        # DFS helper to find loops
-        pass
+    def dfs_cycles(self, node, start, path):
+        path.append(node)
 
-    def is_loop_duplicate(self, new_loop):
-        # Check if a loop is a duplicate
-        pass
 
-    def are_circular_arrays(self, arr1, arr2):
-        # Check if two arrays are circularly identical
-        pass
+    def is_duplicate_cycle(self, new_cycle):
 
-    def find_input_node(self):
-        # Find the input node
-        pass
+        return 
 
-    def find_output_node(self):
-        # Find the output node
-        pass
+    def are_elements_equal(self, arr1, arr2):
+        return 
 
-    def get_forward_paths(self):
-        # Find all forward paths
-        pass
+    def are_circular_identical(self, arr1, arr2):
 
-    def dfs_forward_paths(self, node, end, path):
-        # DFS helper to find forward paths
-        pass
+        return 
 
-    def calculate_gain(self, path):
-        # Calculate the gain of a path
-        pass
+    def get_non_touching_cycles(self):
 
-    def calculate_loop_gains(self):
-        # Calculate gains of all loops
-        pass
+        return 
 
-    def calculate_overall_delta(self):
-        # Calculate overall delta (Δ)
-        pass
+    def get_n_non_touching_cycles(self, n):
 
-    def calculate_transfer_function(self):
-        # Calculate the overall transfer function
-        pass
+        return 
+
+    def are_non_touching(self, comb):
+
+        return 
+
+    def do_cycles_touch(self, cycle1, cycle2):
+        return 
+
+    def find_start_node(self):
+
+        return 
+
+    def find_end_node(self):
+
+        return 
+
+    def get_paths(self):
+
+        return 
+
+    def dfs_paths(self, node, end, path):
+        self.visited[node] = True
+        
+        
+
+    def compute_gain(self, path):
+
+        return 
+
+    def compute_cycle_gains(self):
+
+        return 
+
+    def compute_path_gains(self):
+
+        return 
+
+    def compute_total_delta(self):
+
+        return 
+
+    def compute_path_deltas(self):
+
+        return 
+
+    def compute_delta_for_path(self, path):
+
+        return 
+
+    def compute_transfer_function(self):
+
+        return    
 
 if __name__ == '__main__':
-    graph = {
-        1: {2: 1, 3: 1},
-        2: {4: 1},
-        3: {4: 1},
-        4: {5: 1},
-        5: {3: 1}
+    graph={
+        'A':[('B',1)],
+        'B':[('C',3.2),('H',1.5),('D',1.5)],
+        'C':[('D',1.5),('B',4.3)],
+        'D':[('C',-0.5),('E',5)],
+        'E':[('D',1.25),('G',3),('F',2)],
+        'F':[('E',-1),('G',4.5)],
+        'G':[('G',3),('F',1.2),('H',1.3)],
+        'H':[]
     }
-    sfg = SignalFlowGraph(graph)
-    sfg.simplify_graph()
-    sfg.find_loops()
-    sfg.calculate_loop_gains()
-    sfg.calculate_overall_delta()
-    sfg.calculate_transfer_function()
-    print(sfg.transfer_function)
+ 
