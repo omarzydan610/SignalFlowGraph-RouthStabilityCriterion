@@ -62,3 +62,19 @@ class SignalFlowGraph:
     def calculate_transfer_function(self):
         # Calculate the overall transfer function
         pass
+    
+if __name__ == '__main__':
+    graph = {
+        1: {2: 1, 3: 1},
+        2: {4: 1},
+        3: {4: 1},
+        4: {5: 1},
+        5: {3: 1}
+    }
+    sfg = SignalFlowGraph(graph)
+    sfg.simplify_graph()
+    sfg.find_loops()
+    sfg.calculate_loop_gains()
+    sfg.calculate_overall_delta()
+    sfg.calculate_transfer_function()
+    print(sfg.transfer_function)
