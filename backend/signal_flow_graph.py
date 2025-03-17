@@ -5,6 +5,7 @@ class SignalFlowGraph:
     def __init__(self, graph):
         self.graph = graph
         self.number_of_nodes = len(graph)
+        self.visited = {node: False for node in self.graph}
         self.initialize()
 
     def initialize(self):
@@ -62,7 +63,7 @@ class SignalFlowGraph:
     def calculate_transfer_function(self):
         # Calculate the overall transfer function
         pass
-    
+
 if __name__ == '__main__':
     graph = {
         1: {2: 1, 3: 1},
