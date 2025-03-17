@@ -8,6 +8,7 @@ import ClearStageButton from "../components/SignalFolwGraphComponents/ClearStage
 import NodesListWindow from "../components/SignalFolwGraphComponents/NodesListWindow";
 import EdgeInput from "../components/SignalFolwGraphComponents/EdgeInput";
 import EdgesListWindow from "../components/SignalFolwGraphComponents/EdgesListWindow";
+import Edge from "../components/SignalFolwGraphComponents/Edge";
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
@@ -27,8 +28,13 @@ function SignalFlowGraphPage() {
   };
 
   const handleRemoveNode = (index) => {
+    const nodeName = nodes[index].name;
     const newNodes = nodes.filter((_, i) => i !== index);
+    const newEdges = edges.filter(
+      (edge) => edge.source !== nodeName && edge.destination !== nodeName
+    );
     setNodes(positionNodes(newNodes));
+    setEdges(newEdges);
   };
 
   const handleClearStage = () => {
@@ -37,8 +43,10 @@ function SignalFlowGraphPage() {
   };
 
   const handleAddEdge = () => {
-    if (isEdgeInvalid(edge, nodes)) {
-      alert("Edge must have valid source, destination, and value");
+    if (isEdgeInvalid(edge, nodes, edges)) {
+      alert(
+        "Edge must have valid source, destination, and value, and must not be a duplicate"
+      );
       return;
     }
     setEdges([...edges, edge]);
@@ -54,15 +62,19 @@ function SignalFlowGraphPage() {
     return name.trim() === "" || nodes.some((node) => node.name === name);
   };
 
-  const isEdgeInvalid = (edge, nodes) => {
+  const isEdgeInvalid = (edge, nodes, edges) => {
     const { source, destination, value } = edge;
     const nodeNames = nodes.map((node) => node.name);
+    const isDuplicate = edges.some(
+      (e) => e.source === source && e.destination === destination
+    );
     return (
       source.trim() === "" ||
       destination.trim() === "" ||
       value.trim() === "" ||
       !nodeNames.includes(source) ||
-      !nodeNames.includes(destination)
+      !nodeNames.includes(destination) ||
+      isDuplicate
     );
   };
 
@@ -123,6 +135,9 @@ function SignalFlowGraphPage() {
             <Layer>
               {nodes.map((node, index) => (
                 <Node key={index} node={node} />
+              ))}
+              {edges.map((edge, index) => (
+                <Edge key={index} edge={edge} nodes={nodes} edges={edges} />
               ))}
             </Layer>
           </Stage>
