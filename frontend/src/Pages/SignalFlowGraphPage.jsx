@@ -81,22 +81,14 @@ function SignalFlowGraphPage() {
   const positionNodes = (nodes) => {
     const stageWidth = 800;
     const stageHeight = 500;
-    const radius = Math.min(stageWidth, stageHeight) / 2.5;
-    const centerX = stageWidth / 2;
+    const nodeSpacing = stageWidth / (nodes.length + 1);
     const centerY = stageHeight / 2;
 
-    if (nodes.length === 1) {
-      return [{ ...nodes[0], x: centerX, y: centerY }];
-    }
-
-    return nodes.map((node, index) => {
-      const angle = (index / nodes.length) * 2 * Math.PI;
-      return {
-        ...node,
-        x: centerX + radius * Math.cos(angle),
-        y: centerY + radius * Math.sin(angle),
-      };
-    });
+    return nodes.map((node, index) => ({
+      ...node,
+      x: nodeSpacing * (index + 1),
+      y: centerY,
+    }));
   };
 
   const getRandomColor = () => {
