@@ -6,11 +6,15 @@ import NodeInput from "../components/SignalFolwGraphComponents/NodeInput";
 import Node from "../components/SignalFolwGraphComponents/Node";
 import ClearStageButton from "../components/SignalFolwGraphComponents/ClearStageButton";
 import NodesListWindow from "../components/SignalFolwGraphComponents/NodesListWindow";
+import EdgeInput from "../components/SignalFolwGraphComponents/EdgeInput";
+import EdgesListWindow from "../components/SignalFolwGraphComponents/EdgesListWindow";
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
   const [nodeName, setNodeName] = useState("");
   const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+  const [edge, setEdge] = useState({ source: "", destination: "", value: "" });
 
   const handleAddNode = () => {
     if (isNodeNameInvalid(nodeName, nodes)) {
@@ -29,10 +33,37 @@ function SignalFlowGraphPage() {
 
   const handleClearStage = () => {
     setNodes([]);
+    setEdges([]);
+  };
+
+  const handleAddEdge = () => {
+    if (isEdgeInvalid(edge, nodes)) {
+      alert("Edge must have valid source, destination, and value");
+      return;
+    }
+    setEdges([...edges, edge]);
+    setEdge({ source: "", destination: "", value: "" });
+  };
+
+  const handleRemoveEdge = (index) => {
+    const newEdges = edges.filter((_, i) => i !== index);
+    setEdges(newEdges);
   };
 
   const isNodeNameInvalid = (name, nodes) => {
     return name.trim() === "" || nodes.some((node) => node.name === name);
+  };
+
+  const isEdgeInvalid = (edge, nodes) => {
+    const { source, destination, value } = edge;
+    const nodeNames = nodes.map((node) => node.name);
+    return (
+      source.trim() === "" ||
+      destination.trim() === "" ||
+      value.trim() === "" ||
+      !nodeNames.includes(source) ||
+      !nodeNames.includes(destination)
+    );
   };
 
   const positionNodes = (nodes) => {
@@ -75,11 +106,16 @@ function SignalFlowGraphPage() {
             setNodeName={setNodeName}
             handleAddNode={handleAddNode}
           />
+          <EdgeInput
+            edge={edge}
+            setEdge={setEdge}
+            handleAddEdge={handleAddEdge}
+          />
           <ClearStageButton handleClearStage={handleClearStage} />
         </div>
-        <div className="flex justify-center items-center mt-4">
+        <div className="flex justify-center items-center">
           <Stage
-            className="mb-4 rounded-lg"
+            className=" rounded-lg"
             width={800}
             height={500}
             style={{ backgroundColor: "white", borderRadius: "15px" }}
@@ -93,7 +129,10 @@ function SignalFlowGraphPage() {
         </div>
       </div>
       {nodes.length > 0 && (
-        <NodesListWindow nodes={nodes} handleRemoveNode={handleRemoveNode} />
+        <div className="w-1/4 flex flex-col">
+          <NodesListWindow nodes={nodes} handleRemoveNode={handleRemoveNode} />
+          <EdgesListWindow edges={edges} handleRemoveEdge={handleRemoveEdge} />
+        </div>
       )}
     </div>
   );
