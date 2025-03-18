@@ -9,6 +9,8 @@ import NodesListWindow from "../components/SignalFolwGraphComponents/NodesListWi
 import EdgeInput from "../components/SignalFolwGraphComponents/EdgeInput";
 import EdgesListWindow from "../components/SignalFolwGraphComponents/EdgesListWindow";
 import Edge from "../components/SignalFolwGraphComponents/Edge";
+import SolveButton from "../components/SignalFolwGraphComponents/SolveButton";
+import solveSignalFlowGraph from "../services/SolveSignalFlowGraphService";
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
@@ -56,6 +58,36 @@ function SignalFlowGraphPage() {
   const handleRemoveEdge = (index) => {
     const newEdges = edges.filter((_, i) => i !== index);
     setEdges(newEdges);
+  };
+
+  const constructAdjacencyMatrix = (nodes, edges) => {
+    const nodeNames = nodes.map((node) => node.name);
+    const matrix = Array(nodes.length)
+      .fill(null)
+      .map(() => Array(nodes.length).fill(0));
+
+    edges.forEach((edge) => {
+      const sourceIndex = nodeNames.indexOf(edge.source);
+      const destinationIndex = nodeNames.indexOf(edge.destination);
+      matrix[sourceIndex][destinationIndex] = parseFloat(edge.value);
+    });
+
+    return matrix;
+  };
+
+  const handleSolve = async () => {
+    const matrix = constructAdjacencyMatrix(nodes, edges);
+    const nodesNames = nodes.map((node) => node.name);
+    try {
+      console.log("Nodes:", nodesNames);
+      console.log("Matrix:", matrix);
+
+      const result = await solveSignalFlowGraph(nodes, matrix);
+      console.log("Solve result:", result);
+      alert("Solve result: " + JSON.stringify(result));
+    } catch (error) {
+      alert("Error solving signal flow graph");
+    }
   };
 
   const isNodeNameInvalid = (name, nodes) => {
@@ -115,7 +147,10 @@ function SignalFlowGraphPage() {
             setEdge={setEdge}
             handleAddEdge={handleAddEdge}
           />
-          <ClearStageButton handleClearStage={handleClearStage} />
+          <div className="flex space-x-20">
+            <ClearStageButton handleClearStage={handleClearStage} />
+            <SolveButton handleSolve={handleSolve} />
+          </div>
         </div>
         <div className="flex justify-center items-center">
           <Stage
