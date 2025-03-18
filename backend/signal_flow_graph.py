@@ -57,12 +57,24 @@ class SignalFlowGraph:
         return 
 
     def find_start_node(self):
-
-        return 
+        if self.start_node is not None:
+            return self.start_node
+        indegree = defaultdict(int)
+        for node in self.graph:
+            for edge in self.graph[node]:
+                indegree[edge[0]] += 1
+        for node in self.graph:
+            if indegree[node] == 0:
+                return node
+        return '1'
 
     def find_end_node(self):
-
-        return 
+        if self.end_node is not None:
+            return self.end_node
+        for node in self.graph:
+            if not self.graph[node]:
+                return node
+        return str(self.node_count)
 
     def get_paths(self):
 
@@ -112,4 +124,46 @@ if __name__ == '__main__':
         'G':[('G',3),('F',1.2),('H',1.3)],
         'H':[]
     }
+    sfg = SignalFlowGraph(graph)
+    
+    # To print list of forward paths
+    print("Forward Paths:", sfg.get_paths())
+
+    # To print list of individual loops
+    print("Individual Loops:", sfg.detect_cycles())
+
+    # to print all combinations of N non-touching loops:
+    all_non_touching_loops=sfg.get_non_touching_cycles()
+
+    counter = 2
+    for list_of_loops in all_non_touching_loops: # list of 2,3,4,.... non touching loops
+        print(f"All {counter} Non-touching loops:")
+        counter+=1
+        inner_loop=0
+        for loops in list_of_loops:     # i - non touching loops
+            for loop in loops:
+                print(sfg.cycles[loop])
+            if inner_loop != len(list_of_loops) - 1:               
+                print(",")
+            inner_loop+=1
+        print("------------") # Seperator Between Different Ns (N-non touching loops)
+
+
+    # To print the overall delta value (Δ)
+    print("Overall Delta:", sfg.compute_total_delta()) 
+
+    # To print Δ1, .... ,Δm (m is number of forward paths)
+    print("Paths Delta:", sfg.compute_path_deltas())
+
+    # To print a list of individual loop GAINS
+    print("Individual Loop Gains:", sfg.compute_cycle_gains()) # This is extra output
+
+    # To print a list of forward path GAINS
+    print("Forward Path Gains:", sfg.compute_path_gains()) # This is extra output
+
+    # (you can print the input and output nodes using the below code)
+    print(f"Input Node: {sfg.find_start_node()}, Output Node: {sfg.find_end_node()}")
+
+    # To print the overall transfer function
+    print("Overall Transfer Function:", sfg.compute_transfer_function()) # Final Result (Most important)
  
