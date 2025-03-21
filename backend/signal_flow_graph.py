@@ -234,6 +234,20 @@ class SignalFlowAnalyzer:
         self.transfer_function = numerator / denominator
         return self.transfer_function           
 
+    def to_dict(self):
+        return {
+            "forward_paths": self.find_forward_paths(),
+            "loops": self.find_loops(),
+            "non_touching_loop_groups": self.find_non_touching_loop_groups(),
+            "total_system_delta": self.calculate_total_system_delta(),
+            "path_deltas": self.calculate_path_deltas(),
+            "loop_gains": self.calculate_loop_gains(),
+            "path_gains": self.calculate_path_gains(),
+            "transfer_function": self.calculate_transfer_function(),
+            "input_node": self.determine_input_node(),
+            "output_node": self.determine_output_node()
+        }
+
 if __name__ == '__main__':
     graph={
         'A':[('B',1)],
@@ -287,4 +301,3 @@ if __name__ == '__main__':
 
     # To print the overall transfer function
     print("Overall Transfer Function:", analyzer.calculate_transfer_function()) # Final Result (Most important)
- 

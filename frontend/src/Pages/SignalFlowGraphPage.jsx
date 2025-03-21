@@ -75,14 +75,26 @@ function SignalFlowGraphPage() {
     return matrix;
   };
 
+  const constructGraph = (nodeNames, matrix) => {
+    const graph = {};
+    nodeNames.forEach((node, i) => {
+      graph[node] = [];
+      matrix[i].forEach((weight, j) => {
+        if (weight !== 0) {
+          graph[node].push([nodeNames[j], weight]);
+        }
+      });
+    });
+    return graph;
+  };
+
   const handleSolve = async () => {
     const matrix = constructAdjacencyMatrix(nodes, edges);
     const nodesNames = nodes.map((node) => node.name);
+    const graph = constructGraph(nodesNames, matrix);
     try {
-      console.log("Nodes:", nodesNames);
-      console.log("Matrix:", matrix);
-
-      const result = await solveSignalFlowGraph(nodes, matrix);
+      console.log("Graph:", graph);
+      const result = await solveSignalFlowGraph(graph);
       console.log("Solve result:", result);
       alert("Solve result: " + JSON.stringify(result));
     } catch (error) {
