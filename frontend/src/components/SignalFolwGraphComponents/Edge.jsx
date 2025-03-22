@@ -82,9 +82,9 @@ const Edge = ({ edge, nodes, edges }) => {
           />
           <Arrow
             points={[
-              sourcePos.x + 20 * Math.cos(Math.PI / 4)-15,
+              sourcePos.x + 20 * Math.cos(Math.PI / 4) - 15,
               sourcePos.y - 30 + 20 * Math.sin(Math.PI / 4),
-              sourcePos.x + 20 * Math.cos(Math.PI / 4)-15,
+              sourcePos.x + 20 * Math.cos(Math.PI / 4) - 15,
               sourcePos.y - 30 + 20 * Math.sin(Math.PI / 4),
             ]}
             stroke="black"
@@ -93,7 +93,7 @@ const Edge = ({ edge, nodes, edges }) => {
             pointerWidth={10}
           />
           <Rect
-            x={sourcePos.x - textWidth / 2-2}
+            x={sourcePos.x - textWidth / 2 - 2}
             y={sourcePos.y - 40}
             width={textWidth + 8}
             height={textHeight}
@@ -120,7 +120,10 @@ const Edge = ({ edge, nodes, edges }) => {
           />
           <Rect
             x={(sourcePos.x + destPos.x) / 2 - 4}
-            y={(points[1] + points[3] - (destPos.x - sourcePos.x + 50) / 5) / 2 - 1}
+            y={
+              (points[1] + points[3] - (destPos.x - sourcePos.x + 50) / 5) / 2 -
+              1
+            }
             width={textWidth + 8}
             height={textHeight + 2}
             fill="black"

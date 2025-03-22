@@ -11,6 +11,7 @@ import EdgesListWindow from "../components/SignalFolwGraphComponents/EdgesListWi
 import Edge from "../components/SignalFolwGraphComponents/Edge";
 import SolveButton from "../components/SignalFolwGraphComponents/SolveButton";
 import solveSignalFlowGraph from "../services/SolveSignalFlowGraphService";
+import Modal from "../components/Modal"; // Import the Modal component
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ function SignalFlowGraphPage() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [edge, setEdge] = useState({ source: "", destination: "", value: "" });
+  const [result, setResult] = useState(null); // State to store the result
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
 
   const handleAddNode = () => {
     if (isNodeNameInvalid(nodeName, nodes)) {
@@ -75,16 +78,29 @@ function SignalFlowGraphPage() {
     return matrix;
   };
 
+  const constructGraph = (nodeNames, matrix) => {
+    const graph = {};
+    nodeNames.forEach((node, i) => {
+      graph[node] = [];
+      matrix[i].forEach((weight, j) => {
+        if (weight !== 0) {
+          graph[node].push([nodeNames[j], weight]);
+        }
+      });
+    });
+    return graph;
+  };
+
   const handleSolve = async () => {
     const matrix = constructAdjacencyMatrix(nodes, edges);
     const nodesNames = nodes.map((node) => node.name);
+    const graph = constructGraph(nodesNames, matrix);
     try {
-      console.log("Nodes:", nodesNames);
-      console.log("Matrix:", matrix);
-
-      const result = await solveSignalFlowGraph(nodes, matrix);
+      console.log("Graph:", graph);
+      const result = await solveSignalFlowGraph(graph);
       console.log("Solve result:", result);
-      alert("Solve result: " + JSON.stringify(result));
+      setResult(result); // Set the result
+      setIsModalOpen(true); // Open the modal
     } catch (error) {
       alert("Error solving signal flow graph");
     }
@@ -175,6 +191,9 @@ function SignalFlowGraphPage() {
           <NodesListWindow nodes={nodes} handleRemoveNode={handleRemoveNode} />
           <EdgesListWindow edges={edges} handleRemoveEdge={handleRemoveEdge} />
         </div>
+      )}
+      {isModalOpen && (
+        <Modal result={result} onClose={() => setIsModalOpen(false)} />
       )}
     </div>
   );
