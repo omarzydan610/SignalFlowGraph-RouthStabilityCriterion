@@ -16,12 +16,7 @@ def analyze():
     print(graph)
     analyzer = SignalFlowAnalyzer(graph)
     result = analyzer.to_dict()
-    # Prevent jsonify from changing the order of returned data
-    return app.response_class(
-        response=json.dumps(result),
-        status=200,
-        mimetype='application/json'
-    )
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(port=5050)
