@@ -11,7 +11,7 @@ import EdgesListWindow from "../components/SignalFolwGraphComponents/EdgesListWi
 import Edge from "../components/SignalFolwGraphComponents/Edge";
 import SolveButton from "../components/SignalFolwGraphComponents/SolveButton";
 import solveSignalFlowGraph from "../services/SolveSignalFlowGraphService";
-import Modal from "../components/Modal"; // Import the Modal component
+import Modal from "../components/SignalFolwGraphComponents/ResultModal"; // Import the Modal component
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
