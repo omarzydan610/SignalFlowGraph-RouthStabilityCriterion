@@ -22,7 +22,7 @@ const Modal = ({ result, onClose }) => {
                 value.length > 0 ? (
                   value.map((item, idx) => (
                     <div key={idx} className="ml-4">
-                      {Array.isArray(item) ? item.join(", ") : item}
+                      {idx + 1}. {Array.isArray(item) ? item.join(", ") : item}
                     </div>
                   ))
                 ) : (

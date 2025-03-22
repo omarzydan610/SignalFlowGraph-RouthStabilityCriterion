@@ -236,68 +236,14 @@ class SignalFlowAnalyzer:
 
     def to_dict(self):
         return {
+            "input_node": self.determine_input_node(),
+            "output_node": self.determine_output_node(),
             "forward_paths": self.find_forward_paths(),
+            "path_gains": self.calculate_path_gains(),
             "loops": self.find_loops(),
             "non_touching_loop_groups": self.find_non_touching_loop_groups(),
-            "total_system_delta": self.calculate_total_system_delta(),
-            "path_deltas": self.calculate_path_deltas(),
             "loop_gains": self.calculate_loop_gains(),
-            "path_gains": self.calculate_path_gains(),
+            "path_deltas": self.calculate_path_deltas(),
+            "total_system_delta": self.calculate_total_system_delta(),
             "transfer_function": self.calculate_transfer_function(),
-            "input_node": self.determine_input_node(),
-            "output_node": self.determine_output_node()
         }
-
-if __name__ == '__main__':
-    graph={
-        'A':[('B',1)],
-        'B':[('C',3.2),('H',1.5),('D',1.5)],
-        'C':[('D',1.5),('B',4.3)],
-        'D':[('C',-0.5),('E',5)],
-        'E':[('D',1.25),('G',3),('F',2)],
-        'F':[('E',-1),('G',4.5)],
-        'G':[('G',3),('F',1.2),('H',1.3)],
-        'H':[]
-    }
-    analyzer = SignalFlowAnalyzer(graph)
-    
-    # To print list of forward paths
-    print("Forward Paths:", analyzer.find_forward_paths())
-
-    # To print list of individual loops
-    print("Individual Loops:", analyzer.find_loops())
-
-    # to print all combinations of N non-touching loops:
-    all_non_touching_loops=analyzer.find_non_touching_loop_groups()
-
-    counter = 2
-    for loop_group in all_non_touching_loops: # list of 2,3,4,.... non touching loops
-        print(f"All {counter} Non-touching loops:")
-        counter+=1
-        inner_loop=0
-        for loops in loop_group:     # i - non touching loops
-            for loop in loops:
-                print(analyzer.loops[loop])
-            if inner_loop != len(loop_group) - 1:               
-                print(",")
-            inner_loop+=1
-        print("------------") # Seperator Between Different Ns (N-non touching loops)
-
-
-    # To print the overall delta value (Δ)
-    print("Overall Delta:", analyzer.calculate_total_system_delta()) 
-
-    # To print Δ1, .... ,Δm (m is number of forward paths)
-    print("Paths Delta:", analyzer.calculate_path_deltas())
-
-    # To print a list of individual loop GAINS
-    print("Individual Loop Gains:", analyzer.calculate_loop_gains()) # This is extra output
-
-    # To print a list of forward path GAINS
-    print("Forward Path Gains:", analyzer.calculate_path_gains()) # This is extra output
-
-    # (you can print the input and output nodes using the below code)
-    print(f"Input Node: {analyzer.determine_input_node()}, Output Node: {analyzer.determine_output_node()}")
-
-    # To print the overall transfer function
-    print("Overall Transfer Function:", analyzer.calculate_transfer_function()) # Final Result (Most important)
