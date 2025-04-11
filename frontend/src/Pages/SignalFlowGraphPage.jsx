@@ -11,7 +11,7 @@ import EdgesListWindow from "../components/SignalFolwGraphComponents/EdgesListWi
 import Edge from "../components/SignalFolwGraphComponents/Edge";
 import SolveButton from "../components/SignalFolwGraphComponents/SolveButton";
 import solveSignalFlowGraph from "../services/SolveSignalFlowGraphService";
-import Modal from "../components/SignalFolwGraphComponents/ResultModal"; // Import the Modal component
+import Modal from "../components/SignalFolwGraphComponents/ResultModal"; 
 
 function SignalFlowGraphPage() {
   const navigate = useNavigate();
@@ -19,8 +19,8 @@ function SignalFlowGraphPage() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [edge, setEdge] = useState({ source: "", destination: "", value: "" });
-  const [result, setResult] = useState(null); // State to store the result
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [result, setResult] = useState(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 
   const handleAddNode = () => {
     if (isNodeNameInvalid(nodeName, nodes)) {
