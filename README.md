@@ -44,5 +44,5 @@ Features
 
 ![1744441654901](images/RouthStability1.png)
 
-| ![1744441654901](images/RouthStability2.png) | ![1744441654901](images/RouthStability3.png)col2 |
+| ![1744441654901](images/RouthStability2.png) | ![1744441654901](images/RouthStability3.png) |
 | -------------------------------------------- | ------------------------------------------------ |
