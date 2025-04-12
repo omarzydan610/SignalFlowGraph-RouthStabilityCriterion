@@ -7,6 +7,25 @@ function RouthTable({ routhArray, isStable, positiveRoots }) {
 
   const maxCols = Math.max(...routhArray.map((row) => row.length));
 
+  // Count sign changes in the first column
+  const countSignChanges = () => {
+    let count = 0;
+    let firstCol = routhArray.map((row) => row[0]);
+
+    // Filter out zeros or very small numbers
+    firstCol = firstCol.filter((val) => Math.abs(val) > 1e-15);
+
+    for (let i = 0; i < firstCol.length - 1; i++) {
+      if (firstCol[i] * firstCol[i + 1] < 0) {
+        count++;
+      }
+    }
+
+    return count;
+  };
+
+  const signChangeCount = countSignChanges();
+
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-lg shadow-lg p-6 mt-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-white mb-4">
@@ -60,18 +79,8 @@ function RouthTable({ routhArray, isStable, positiveRoots }) {
           <div className="mt-2">
             <p>
               Number of right-half plane poles:{" "}
-              <span className="font-bold">
-                {(() => {
-                  // Calculate the number of roots based on data type
-                  if (typeof positiveRoots === "number") return 1;
-                  if (Array.isArray(positiveRoots)) return positiveRoots.length;
-                  if (
-                    typeof positiveRoots === "object" &&
-                    positiveRoots !== null
-                  )
-                    return Object.keys(positiveRoots).length;
-                  return 0;
-                })()}
+              <span className="font-bold">{signChangeCount}</span>{" "}
+              <span className="text-sm">
               </span>
             </p>
 
