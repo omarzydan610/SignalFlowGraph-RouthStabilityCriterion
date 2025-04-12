@@ -1,6 +1,6 @@
 import React from "react";
 
-function RouthTable({ routhArray, isStable, rightHalfPoleCount }) {
+function RouthTable({ routhArray, isStable, positiveRoots }) {
   if (!routhArray || routhArray.length === 0) {
     return null;
   }
@@ -26,7 +26,7 @@ function RouthTable({ routhArray, isStable, rightHalfPoleCount }) {
                     key={cellIndex}
                     className="border border-blue-300 bg-white/20 text-white px-4 py-2"
                   >
-                    {cell.toFixed(4)}
+                    {cell.toFixed(2)}
                   </td>
                 ))}
                 {/* Add empty cells to even out the table */}
@@ -55,10 +55,108 @@ function RouthTable({ routhArray, isStable, rightHalfPoleCount }) {
           </span>
         </p>
         {!isStable && (
-          <p className="mt-2">
-            Number of right-half plane poles:{" "}
-            <span className="font-bold">{rightHalfPoleCount}</span>
-          </p>
+          <div className="mt-2">
+            <p>
+              Number of right-half plane poles:{" "}
+              <span className="font-bold">
+                {(() => {
+                  // Calculate the number of roots based on data type
+                  if (typeof positiveRoots === "number") return 1;
+                  if (Array.isArray(positiveRoots)) return positiveRoots.length;
+                  if (
+                    typeof positiveRoots === "object" &&
+                    positiveRoots !== null
+                  )
+                    return Object.keys(positiveRoots).length;
+                  return 0;
+                })()}
+              </span>
+            </p>
+
+            {/* Display the actual roots */}
+            <div className="mt-2">
+              <p className="font-semibold">Right-half plane poles:</p>
+              <ul className="list-disc pl-6">
+                {(() => {
+                  // Single number
+                  if (typeof positiveRoots === "number") {
+                    return <li>{positiveRoots.toFixed(2)}</li>;
+                  }
+
+                  // Array of numbers or objects
+                  if (Array.isArray(positiveRoots)) {
+                    return positiveRoots.map((root, idx) => {
+                      if (typeof root === "number") {
+                        // Simple real number
+                        return <li key={idx}>{root.toFixed(2)}</li>;
+                      } else if (typeof root === "object" && root !== null) {
+                        // Complex number as object with real/imag
+                        try {
+                          const realPart =
+                            typeof root.real === "number"
+                              ? root.real.toFixed(2)
+                              : root.real;
+                          let imagPart = "";
+                          if (root.imag !== 0) {
+                            const imagValue =
+                              typeof root.imag === "number"
+                                ? Math.abs(root.imag).toFixed(2)
+                                : Math.abs(parseFloat(root.imag));
+                            const imagSign =
+                              parseFloat(String(root.imag)) >= 0 ? "+" : "-";
+                            imagPart = `${imagSign} ${imagValue}i`;
+                          }
+                          return (
+                            <li key={idx}>
+                              {realPart} {imagPart}
+                            </li>
+                          );
+                        } catch (err) {
+                          return <li key={idx}>{JSON.stringify(root)}</li>;
+                        }
+                      }
+                      return <li key={idx}>{String(root)}</li>;
+                    });
+                  }
+
+                  // Object with numeric keys (complex numbers)
+                  if (
+                    typeof positiveRoots === "object" &&
+                    positiveRoots !== null
+                  ) {
+                    return Object.keys(positiveRoots).map((key) => {
+                      const root = positiveRoots[key];
+                      try {
+                        const realPart =
+                          typeof root.real === "number"
+                            ? root.real.toFixed(2)
+                            : root.real;
+                        let imagPart = "";
+                        if (root.imag !== 0) {
+                          const imagValue =
+                            typeof root.imag === "number"
+                              ? Math.abs(root.imag).toFixed(2)
+                              : Math.abs(parseFloat(root.imag));
+                          const imagSign =
+                            parseFloat(String(root.imag)) >= 0 ? "+" : "-";
+                          imagPart = `${imagSign} ${imagValue}i`;
+                        }
+                        return (
+                          <li key={key}>
+                            {realPart} {imagPart}
+                          </li>
+                        );
+                      } catch (err) {
+                        return <li key={key}>{JSON.stringify(root)}</li>;
+                      }
+                    });
+                  }
+
+                  return <li>No roots data available</li>;
+                })()}
+              </ul>
+            </div>
+          </div>
         )}
       </div>
     </div>

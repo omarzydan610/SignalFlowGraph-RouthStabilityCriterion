@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5050/analyze";
+const API_URL = "http://localhost:5050/signal-flow-graph";
 
 const solveSignalFlowGraph = async (graph) => {
   try {

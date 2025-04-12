@@ -1,9 +1,10 @@
 import sympy as sp
 
 class RouthHurwitz:
-    def __init__(self):
+    def __init__(self, coefficients=None):
         self.parsed_expression = None
         self.symbols_dict = None
+        self.coefficients = coefficients
 
     def normalize_coeff_dict(self, coeff_dict):
         """Generates a modified dictionary for the coefficients of the characteristic eqn
@@ -19,34 +20,6 @@ class RouthHurwitz:
                 modified_dict[str(item[0])] = item[1]
         return modified_dict
 
-    def verify_powers_exist(self, powers):
-        """Check whether all the powers exist or not
-        NB: If the zero-th power doesn't exist it can't determine the result
-        and needs further routh calculations."""
-        p_list = []
-        for pow in powers:
-            p_list.append(int(pow[-1]))
-        
-        if len(p_list) == max(p_list) + 1:
-            return True
-        if 0 not in p_list and len(p_list) == max(p_list):
-            return True
-        return False
-
-    def verify_coeff_signs(self, coefficients):
-        """Checks whether the characterstic coeffiecients have the same sign or not"""
-        negative = 0
-        positive = 0
-        for coeff in coefficients:
-            if int(coeff) < 0:
-                negative += 1
-                if positive:
-                    return False
-            elif int(coeff) > 0:
-                positive += 1
-                if negative:
-                    return False
-        return True
 
     def initialize_routh_matrix(self, coeff_dict):
         """Initializes the Routh Array with the first 2 coefficienst Rows"""
@@ -120,75 +93,164 @@ class RouthHurwitz:
                 sign_change += 1
         return sign_change        
 
-    def get_characteristic_equation(self):
-        """Parse the input string into a sympy expression and 
-        return the symbols used in the expression.
-        Returns:
-            parsed_expression: sympy expression
-            symbols_dict: dictionary of symbols used in the expression
+    def array_to_expression(self):
+        """Convert an array of coefficients to a symbolic expression
+        Coefficients are in decreasing order of power
+        Example: [1,5,2,3] -> s^3 + 5*s^2 + 2*s + 3
         """
-        expression_str = input("Enter the Characteristic Equation in the form a*s**n + b*s**n-1 ... c*s**2 + d*s**1 + e(*s**0)\n")
+        s = sp.Symbol('s')
+        if not self.coefficients:
+            return None
+        
+        expr = 0
+        for i, coef in enumerate(self.coefficients):
+            power = len(self.coefficients) - i - 1
+            expr += coef * s**power
+        
+        return expr
 
-        try:
-            self.parsed_expression = sp.sympify(expression_str)
-            self.symbols_dict = {str(symbol): symbol for symbol in self.parsed_expression.free_symbols}
-            return True
-        except Exception as e:
-            print("Error:", e)
-            return False
+    def get_characteristic_equation(self, coefficients=None):
+        """Parse the coefficients array or input string into a sympy expression
+        
+        Args:
+            coefficients: Optional array of coefficients in decreasing order of power
+            
+        Returns:
+            True if parsing was successful, False otherwise
+        """
+        if coefficients is not None:
+            self.coefficients = coefficients
+            
+        if self.coefficients is not None:
+            try:
+                self.parsed_expression = self.array_to_expression()
+                s = sp.Symbol('s')
+                self.symbols_dict = {'s': s}
+                return True
+            except Exception as e:
+                print("Error:", e)
+                return False
+        else:
+            expression_str = input("Enter the Characteristic Equation in the form a*s**n + b*s**n-1 ... c*s**2 + d*s**1 + e(*s**0)\n")
+            try:
+                self.parsed_expression = sp.sympify(expression_str)
+                self.symbols_dict = {str(symbol): symbol for symbol in self.parsed_expression.free_symbols}
+                return True
+            except Exception as e:
+                print("Error:", e)
+                return False
 
     def find_roots(self):
         """Solve the equation to find the values of the positive roots"""
         if self.parsed_expression and self.symbols_dict:
-            return sp.solve(self.parsed_expression, self.symbols_dict)
+            s = sp.Symbol('s')
+            return sp.solve(self.parsed_expression, s)
         return []
 
-    def analyze_stability(self):
-        """Main method to analyze system stability using Routh-Hurwitz criterion"""
-        while not self.get_characteristic_equation():
-            print("Please enter a valid expression.")
+    def _convert_to_serializable(self, obj):
+        """Convert sympy objects and other non-serializable types to JSON-serializable types"""
+        if isinstance(obj, (list, tuple)):
+            return [self._convert_to_serializable(item) for item in obj]
+        elif isinstance(obj, dict):
+            return {k: self._convert_to_serializable(v) for k, v in obj.items()}
+        elif hasattr(obj, 'is_real') and hasattr(obj, 'evalf'):  # For sympy numbers and expressions
+            evalf_result = obj.evalf()
+            # Check if the result is complex before converting to float
+            if hasattr(evalf_result, 'is_complex') and evalf_result.is_complex or not evalf_result.is_real:
+                real, imag = evalf_result.as_real_imag()
+                if float(imag) == 0:
+                    return float(real)
+                return {"real": float(real), "imag": float(imag)}
+            else:
+                return float(evalf_result)
+        elif hasattr(obj, 'as_real_imag'):  # For complex numbers from sympy
+            real, imag = obj.as_real_imag()
+            if float(imag) == 0:
+                return float(real)
+            return {"real": float(real), "imag": float(imag)}
+        elif isinstance(obj, complex):
+            return {"real": obj.real, "imag": obj.imag}  # Convert complex to dict representation
+        else:
+            # Try to convert to float or return as is
+            try:
+                return float(obj)
+            except (TypeError, ValueError):
+                return str(obj)
 
-        substituted_expr = self.parsed_expression.subs(self.symbols_dict)
-        print(sp.latex(substituted_expr))
+    def to_dict(self, coefficients=None):
+        """Main method to analyze system stability using Routh-Hurwitz criterion
+        
+        Args:
+            coefficients: Optional array of coefficients in decreasing order of power
+            
+        Returns:
+            dict: Dictionary containing only routh matrix, stability status, and roots (if unstable)
+        """
+        # Initialize with just the essential fields
+        result = {
+            'isStable': False,
+            'routhMatrix': []
+        }
+        
+        if coefficients is not None:
+            self.coefficients = coefficients
+            
+        if not self.get_characteristic_equation():
+            return result
+        
+        if self.symbols_dict and 's' in self.symbols_dict:
+            substituted_expr = self.parsed_expression
+        else:
+            substituted_expr = self.parsed_expression.subs(self.symbols_dict)
+        
+        print(f"Characteristic equation: {substituted_expr}")
+        print(f"LaTeX form: {sp.latex(substituted_expr)}")
+        
         coeff_dict = substituted_expr.as_coefficients_dict()
         normalized_dict = self.normalize_coeff_dict(coeff_dict)
         
         stability = 0
-        if not self.verify_powers_exist(normalized_dict.keys()):
-            print("System is Unstable: Missing powers of s.")
-            print("Finding the number of roots.")
-            print("________________________________________")
-            stability = -1
-        elif not self.verify_coeff_signs(normalized_dict.values()):
-            print("System is Unstable: Coefficients alternate signs.")
-            print("Finding the number of roots.")
-            print("________________________________________")
-            stability = -1
-        else:
-            matrix = self.initialize_routh_matrix(normalized_dict)
-            routh_matrix, state = self.compute_routh_matrix(matrix)
-            stability = self.determine_stability(routh_matrix)
-            
-            if state == -1:
-                print("System has a zero row in the Routh array ... Checking for Marginal Stability.")
-            elif state == 0:
-                print("System has a zero division error in the Routh array.")
-            else:
-                print("System has no zero division error in the Routh array.")
-            print("Final Matrix: ", routh_matrix)
-            
-            if stability == 0:
-                print("Stability Check: System is Stable.")
-            else:
-                print(f"Stability Check: System is Unstable and has {stability} roots in the positive side of the S-plane.")
+        matrix = self.initialize_routh_matrix(normalized_dict)
+        routh_matrix, state = self.compute_routh_matrix(matrix)
+        stability = self.determine_stability(routh_matrix)
         
-        if stability:
+        # Store the Routh matrix in the result - convert values to be JSON serializable
+        result['routhMatrix'] = self._convert_to_serializable([row[:] for row in routh_matrix])
+        
+        if state == -1:
+            print("System has a zero row in the Routh array ... Checking for Marginal Stability.")
+        elif state == 0:
+            print("System has a zero division error in the Routh array.")
+        else:
+            print("System has no zero division error in the Routh array.")
+        
+        print("Final Matrix: ", routh_matrix)
+        
+        if stability == 0:
+            result['isStable'] = True
+            print("Stability Check: System is Stable.")
+        else:
+            result['isStable'] = False
+            print(f"Stability Check: System is Unstable and has {stability} roots in the positive side of the S-plane.")
+        
+        # Only include positive roots if the system is unstable
+        if stability != 0:
+            positive_roots = []
             count = 1
             for root in self.find_roots():
                 root = sp.N(root)
                 if sp.re(root) > 0:
+                    # Convert complex roots to a serializable format
+                    positive_roots.append(self._convert_to_serializable(root))
                     print(f"Root {count}: ", root)
                     count += 1
+            
+            # Only add roots to the result if there are any
+            if positive_roots:
+                result['positiveRoots'] = positive_roots
+        
+        # Final conversion to ensure everything is JSON serializable
+        return self._convert_to_serializable(result)
 
 if __name__ == "__main__":
     analyzer = RouthHurwitz()
