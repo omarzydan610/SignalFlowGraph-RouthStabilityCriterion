@@ -42,7 +42,7 @@ class RouthHurwitz:
     def compute_routh_matrix(self, matrix):
         """Calculates the routh array for a given coeffiecients matrix
         Exceptions:
-            case 0 row: handled if the auxilliary equation is even-ordered
+            case 0 row: handled by creating auxiliary polynomial and using derivatives
             case 0 in the first column: handled using 1e-10 instead of 0
         Returns:
             matrix: The new Routh Array
@@ -61,16 +61,20 @@ class RouthHurwitz:
                         if matrix[i-1][j] != 0:
                             row = False
                     if row:
+                        # Zero row handling - for both odd and even ordered auxiliary polynomials
                         state = -1
                         pow = n - (i - 2) - 1
-                        if pow % 2 == 0:
-                            for j in range(0, len(matrix[0])-1):
-                                if pow >= 0:
-                                    matrix[i-1][j] = pow * matrix[i-2][j]
-                                    pow -= 2
-                                matrix[i][j] = (matrix[i-1][0]*matrix[i-2][j+1] - matrix[i-2][0]*matrix[i-1][j+1]) / matrix[i-1][0]
-                        else:
-                            raise Exception("System can't be tested for stability: Odd-Ordered Auxiliary Equation")
+                        
+                        # Use the derivative approach regardless of whether pow is odd or even
+                        for j in range(0, len(matrix[0])-1):
+                            if pow >= 0:
+                                matrix[i-1][j] = pow * matrix[i-2][j]
+                                pow -= 2
+                            matrix[i][j] = (matrix[i-1][0]*matrix[i-2][j+1] - matrix[i-2][0]*matrix[i-1][j+1]) / matrix[i-1][0]
+                        
+                        # Record whether we had an odd-ordered auxiliary polynomial
+                        if (n - (i - 2) - 1) % 2 != 0:
+                            state = -2  # Special indicator for odd-ordered
                     else:
                         state = 0
                         matrix[i-1][0] = 1e-10
@@ -218,7 +222,9 @@ class RouthHurwitz:
         result['routhMatrix'] = self._convert_to_serializable([row[:] for row in routh_matrix])
         
         if state == -1:
-            print("System has a zero row in the Routh array ... Checking for Marginal Stability.")
+            print("System has a zero row in the Routh array ... Checking for Marginal Stability (even-ordered auxiliary polynomial).")
+        elif state == -2:
+            print("System has a zero row in the Routh array ... Checking for Marginal Stability (odd-ordered auxiliary polynomial).")
         elif state == 0:
             print("System has a zero division error in the Routh array.")
         else:

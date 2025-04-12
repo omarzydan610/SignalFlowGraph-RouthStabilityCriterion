@@ -26,7 +26,9 @@ function RouthTable({ routhArray, isStable, positiveRoots }) {
                     key={cellIndex}
                     className="border border-blue-300 bg-white/20 text-white px-4 py-2"
                   >
-                    {cell.toFixed(2)}
+                    {cellIndex === 0 && Math.abs(cell) < 1e-15
+                      ? "1e-10"
+                      : cell.toFixed(2)}
                   </td>
                 ))}
                 {/* Add empty cells to even out the table */}
