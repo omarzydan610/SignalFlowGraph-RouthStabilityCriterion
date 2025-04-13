@@ -2,6 +2,8 @@
 
 This project was developed as part of the **Control Systems Basics** course at **Alexandria University**.
 
+![Stability1](images/HomePage.png)
+
 **The project is divided into two parts:**
 
 ## Part 1: Signal Flow Graph and Transfer Function Calculation
