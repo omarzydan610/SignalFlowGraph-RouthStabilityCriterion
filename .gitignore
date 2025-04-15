@@ -1,26 +1,11 @@
-# React
+# Node.js
 build/
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-.env
-.env.local
-.env.*.local
+/.pnp
+.pnp.js
 
-# Spring Boot
-target/
-.mvn/
-*.log
-*.env
-
-# IDEs and OS
-*.iml
+# IDEs
 .idea/
 .vscode/
-*.DS_Store
-*.tmp
 *.swp
-*.bak
 *.swo
