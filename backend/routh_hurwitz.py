@@ -40,48 +40,37 @@ class RouthHurwitz:
         return routh_matrix
 
     def compute_routh_matrix(self, matrix):
-        """Calculates the routh array for a given coeffiecients matrix
-        Exceptions:
-            case 0 row: handled by creating auxiliary polynomial and using derivatives
-            case 0 in the first column: handled using 1e-10 instead of 0
-        Returns:
-            matrix: The new Routh Array
-            state: state identifying whether there is an exception."""
         n = len(matrix)
         state = 1
         for i in range(2, n):
+            if all(value == 0 for value in matrix[i - 1]):
+                state = -1
+                order = n - i
+                aux = []
+                pow = order + (order % 2)
+                for val in matrix[i - 2]:
+                    if pow >= 0:
+                        aux.append(pow * val)
+                        pow -= 2
+                for j in range(len(matrix[0])):
+                    if j < len(aux):
+                        matrix[i - 1][j] = aux[j]
+                    else:
+                        matrix[i - 1][j] = 0
+                # Now re-compute current row using updated (i-1) row
+            if matrix[i - 1][0] == 0:
+                matrix[i - 1][0] = 1e-10
+                state = 0
             for j in range(0, len(matrix[0]) - 1):
                 try:
-                    if matrix[i-1][0] == 0:
-                        raise ZeroDivisionError
-                    matrix[i][j] = (matrix[i-1][0]*matrix[i-2][j+1] - matrix[i-2][0]*matrix[i-1][j+1]) / matrix[i-1][0]
+                    matrix[i][j] = (
+                        matrix[i - 1][0] * matrix[i - 2][j + 1]
+                        - matrix[i - 2][0] * matrix[i - 1][j + 1]
+                    ) / matrix[i - 1][0]
                 except ZeroDivisionError:
-                    row = True
-                    for j in range(0, len(matrix[0]) - 1):
-                        if matrix[i-1][j] != 0:
-                            row = False
-                    if row:
-                        # Zero row handling - for both odd and even ordered auxiliary polynomials
-                        state = -1
-                        pow = n - (i - 2) - 1
-                        
-                        # Use the derivative approach regardless of whether pow is odd or even
-                        for j in range(0, len(matrix[0])-1):
-                            if pow >= 0:
-                                matrix[i-1][j] = pow * matrix[i-2][j]
-                                pow -= 2
-                            matrix[i][j] = (matrix[i-1][0]*matrix[i-2][j+1] - matrix[i-2][0]*matrix[i-1][j+1]) / matrix[i-1][0]
-                        
-                        # Record whether we had an odd-ordered auxiliary polynomial
-                        if (n - (i - 2) - 1) % 2 != 0:
-                            state = -2  # Special indicator for odd-ordered
-                    else:
-                        state = 0
-                        matrix[i-1][0] = 1e-10
-                        for j in range(0, len(matrix[0]) - 1):
-                            matrix[i][j] = (matrix[i-1][0]*matrix[i-2][j+1] - matrix[i-2][0]*matrix[i-1][j+1]) / matrix[i-1][0]
-                    
+                    matrix[i][j] = 0
         return matrix, state
+
 
     def determine_stability(self, matrix):
         """Checks whether the system is stable after conducting the Routh Array"""
